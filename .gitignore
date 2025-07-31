@@ -1,3 +1,8 @@
+#--------User Defined Ignores----------
+#Google API JSON Key File
+key.json
+
+#--------Auto Generated Ignore---------
 # Logs
 logs
 *.log
