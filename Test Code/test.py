@@ -1,4 +1,4 @@
-from mainapp.liquidcrystal_i2c import liquidcrystal_i2c
+import liquidcrystal_i2c
 
 cols = 20
 rows = 4
