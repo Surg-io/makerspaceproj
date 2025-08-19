@@ -27,6 +27,13 @@ app.get("/", async (req,res) =>
   return res.status(200).send({"Success":"True"});
 });
 
+//Ensures the server is initialized
+app.get("/test", async (req,res) =>
+{
+  return res.status(200).send({"Success":"True"});
+});
+
+
 app.post("/scan", async (req,res) => 
 {
   let date = new Date();

@@ -10,13 +10,9 @@ import liquidcrystal_i2c
 
 cols = 20
 rows = 4
-
 lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=rows)
+lcd.clear()
 
-lcd.printline(0, 'Initializing'.center(cols))
-lcd.printline(1, 'Backend...'.center(cols))
-lcd.printline(2, 'python-')
-lcd.printline(3, 'liquidcrystal_i2c'.rjust(cols))
 
 cap = cv2.VideoCapture(0)
 detector = cv2.QRCodeDetector()
@@ -42,7 +38,9 @@ def attempt_reconnection():
     #nmcli device connect wlan0 - Reconnects the most recently used saved Wi-Fi network that’s available, based on its priority list
     #nmcli connection modify "SSID" connection.priority 10 - Modifies the priority of connection with the given SSID
 
-    print("Attempting to reconnect...")
+    #print("Attempting to reconnect...")
+    lcd.printline(1, 'Reconnecting'.center(cols))
+    lcd.printline(2, 'to Internet...'.center(cols))
     subprocess.check_call(["nmcli","device","disconnect","wlan0"], 
     stdout=subprocess.DEVNULL, # Hide output from printing to console.(Redirects stdout to DEVNULL)
     stderr=subprocess.DEVNULL # Hide error output
@@ -52,8 +50,12 @@ def attempt_reconnection():
     stdout=subprocess.DEVNULL, # Hide output from printing to console.(Redirects stdout to DEVNULL)
     stderr=subprocess.DEVNULL # Hide error output
     )
+    sleep(10) #Allows the connection to disconnect
 
 
+
+lcd.printline(1, 'Initializing'.center(cols))
+lcd.printline(2, 'Server...'.center(cols))
 
 #Start Local Server
 #subprocess.check_call(["npm","run","production"], 
@@ -61,25 +63,31 @@ def attempt_reconnection():
 #    stderr=subprocess.DEVNULL # Hide error output
 #    )
 
-while True:
-    #if has_internet(): #Ping Google
-        while True: 
-            _, img = cap.read()
-            data, bbox, _ = detector.detectAndDecode(img)
-            if data:
-                print(data)
-                response = requests.post("http://localhost:8000/scan", json={"id": data})
-                print(response)
-                #frequency = 900
-                #duration = 500
-                #winsound.Beep(frequency,duration)
-                if not response.Success:
-                    #print error message
-                    break
-                sleep(3)
-            cv2.imshow("QRCODEscanner", img)
-            
-    #else:
-        #attempt_reconnection() #Attempt Reconnection
+#message = 0 #Boolean to denote that a message has been posted so we don't get repeats...
+lcd.clear()
+
+
+while True: 
+    lcd.printline(1, 'Ready for Scan'.center(cols))
+    _, img = cap.read() # I believe this is interupt based, so it will record until it sees a QR code
+    data, bbox, _ = detector.detectAndDecode(img) #Decode QR code
+    if data: #After Scan...
+        lcd.clear()
+        lcd.printline(1, 'Scanning...'.center(cols))
+        if has_internet(): #Check Internet...
+            response = requests.post("http://localhost:8000/scan", json={"id": data})
+            if not response.Success:
+                lcd.printline(2, 'Error Scanning'.center(cols))
+                lcd.printline(3, 'Restart'.center(cols))
+                break
+            lcd.printline(2, 'Scan Success'.center(cols))
+            sleep(3)
+            lcd.clear()
+        else:
+            lcd.clear()
+            attempt_reconnection()
+            lcd.clear()
+    cv2.imshow("QRCODEscanner", img)    
+    
 cap.release()
 cv2.destroyAllWindows()

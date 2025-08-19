@@ -5,6 +5,10 @@
 
 #!/bin/bash
 
+#Enable I2C
+
+#sudo apt install python3-smbus
+
 echo "Setting I2C device permissions..."
 sudo chmod 666 /dev/i2c-*
 
@@ -27,6 +31,11 @@ echo "Adjusting wifi prioritizations..."
 
 # Org Wi-Fi: first choice. (Setting Priorities is optional)
 #nmcli connection modify orgwifi connection.priority 100
+
+#nmcli connection modify "<connection-name>" connection.autoconnect-priority <priority-value>
+
+#nmcli connection modify "Hotspot" connection.autoconnect-retries 0 //Infinite amount of retries
+
 
 
 
