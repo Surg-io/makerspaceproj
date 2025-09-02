@@ -9,7 +9,8 @@ export async function SheetsGet(res,sheets, spreadsheetId, range) {
       return result;
     }catch(err)
     {
-      return SheetsConnectionError(res,err);
+      SheetsConnectionError(res,err); //This will send response. 
+      return null; //Allows index.js to know this failed.
     }
 }
 
@@ -24,7 +25,8 @@ export async function SheetsUpdate(res,sheets, spreadsheetId, range, resource) {
           console.log(`Cells cleared.`);
           return result;
         } catch (err) {
-          return SheetsConnectionError(res,err);
+          SheetsConnectionError(res,err);
+          return null;
         }
 }
 
@@ -39,7 +41,8 @@ export async function SheetsAppend(res,sheets, spreadsheetId, range,resource) {
       console.log(`Sheet Appended`);
       return result;
     } catch (err) {
-      return SheetsConnectionError(res,err);
+     SheetsConnectionError(res,err);
+     return null;
     }
 }
 
@@ -55,6 +58,7 @@ export async function SheetsBatchGet(res,sheets, spreadsheetId, range) {
   }
   catch(err)
   {
-    return SheetsConnectionError(res,err); //Send Error, if there is one.
+     SheetsConnectionError(res,err); //Send Error, if there is one.
+     return null;
   }
 }

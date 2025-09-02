@@ -7,13 +7,10 @@ import subprocess #Allows us to run console commands
 from pyzbar import pyzbar
 import liquidcrystal_i2c 
 
-
-
 cols = 20
 rows = 4
 lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=rows)
 lcd.clear()
-
 
 cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
@@ -59,11 +56,11 @@ def attempt_reconnection():
 lcd.printline(1, 'Initializing'.center(cols))
 lcd.printline(2, 'Server...'.center(cols))
 
-#Start Local Server
-#subprocess.check_call(["npm","run","production"], 
-#    stdout=subprocess.DEVNULL, # Hide output from printing to console.(Redirects stdout to DEVNULL)
-#    stderr=subprocess.DEVNULL # Hide error output
-#    )
+#Start Local Server. Popen command is non-blocking
+#proc = subprocess.Popen(
+#    ["npm", "run", "production"],
+#    cwd="/home/makerpi/Projects/makerspaceproj"
+#)
 
 #message = 0 #Boolean to denote that a message has been posted so we don't get repeats...
 lcd.clear()
@@ -95,6 +92,7 @@ try:
         if has_internet(): #Check Internet...
             response = requests.post("http://localhost:8000/scan", json={"id": data})
             if not response.Success:
+                print(response)
                 lcd.printline(2, 'Error Inputing'.center(cols))
                 lcd.printline(3, 'Restart'.center(cols))
                 break
@@ -107,6 +105,11 @@ try:
             lcd.clear()
 except KeyboardInterrupt: #Handles CTRL+C when exiting
     print("Interrupt Recieved...")
+
 finally:
+    lcd.clear()
+    lcd.printline(1, 'Program Terminated'.center(cols))
+    proc.terminate() #Terminate Server Process
+    proc.wait() #Ensures server terminates by blocking until its done
     cap.release()
     print("Camera released. Exiting. ")
