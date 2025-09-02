@@ -9,11 +9,16 @@
 
 #sudo apt install python3-smbus
 
-echo "Setting I2C device permissions..."
-sudo chmod 666 /dev/i2c-*
+#Adjust the config files to enable the I2C flag. This should automatically setup
+#echo "Setting I2C device permissions..."
+#sudo chmod 666 /dev/i2c-*
 
-echo "Installing Python dependencies from requirements.txt..."
-pip install -r requirements.txt
+#echo "Installing Python dependencies from requirements.txt..."
+#pip install -r requirements.txt
+
+#Installing nodejs
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt install -y nodejs
 
 echo "Installing Node.js dependencies..."
 npm install

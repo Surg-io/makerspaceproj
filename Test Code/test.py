@@ -1,13 +1,39 @@
-import liquidcrystal_i2c
+import cv2
+from pyzbar import pyzbar
 
-cols = 20
-rows = 4
+cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
-lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=rows)
+print("Starting QR code detection...")
 
-lcd.printline(0, 'Initializing'.center(cols))
-lcd.printline(1, 'Backend...'.center(cols))
-lcd.printline(2, 'python-')
-lcd.printline(3, 'liquidcrystal_i2c'.rjust(cols))
-lcd.clear()
-lcd.printline(1, 'Done!'.center(cols))
+intframe = 0
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        print("Failed to grab frame")
+        break
+
+    intframe += 1
+
+    if(intframe % 5 != 0): #Decode every 5th frame. Camera runs ~25 frames a sec, so about 5 times a sec
+        continue
+        
+    decoded_objects = pyzbar.decode(frame)
+
+
+    '''
+    for obj in decoded_objects:
+        print(f"Detected QR code: {obj.data.decode('utf-8')}")
+    '''
+    print(decoded_objects) #This should print one thing, one string...
+    
+    
+
+    # Break after first detection for testing
+    if decoded_objects:
+        break
+
+cap.release()
+print("Done")

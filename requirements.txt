@@ -1,4 +1,6 @@
 # This files serves as a "dependency" file for python. We need the following libraries, so running 'pip install -r requirements.txt' will download the following for the proj.
 smbusn
-node
+python3-opencv
+python3-pyzbar
+#Requires external steps: node
 

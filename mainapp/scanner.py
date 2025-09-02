@@ -4,6 +4,7 @@ from time import sleep
 import requests
 import cv2
 import subprocess #Allows us to run console commands
+from pyzbar import pyzbar
 import liquidcrystal_i2c 
 
 
@@ -14,8 +15,9 @@ lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=rows)
 lcd.clear()
 
 
-cap = cv2.VideoCapture(0)
-detector = cv2.QRCodeDetector()
+cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
 def has_internet():
     try:
@@ -66,18 +68,34 @@ lcd.printline(2, 'Server...'.center(cols))
 #message = 0 #Boolean to denote that a message has been posted so we don't get repeats...
 lcd.clear()
 
+data = []
+framenum = 0
 
-while True: 
-    lcd.printline(1, 'Ready for Scan'.center(cols))
-    _, img = cap.read() # I believe this is interupt based, so it will record until it sees a QR code
-    data, bbox, _ = detector.detectAndDecode(img) #Decode QR code
-    if data: #After Scan...
+try:
+    while True: 
+        lcd.printline(1, 'Ready for Scan'.center(cols))
+        while not data: #While we haven't had a code...
+            ret, frame = cap.read() # Read a frame
+            framenum += 1
+            if framenum % 5 != 0: #Decode every 5th frame. FPS is ~25 for the camera and pi
+                continue
+            if not ret: #Error in reading frame
+                lcd.printline(2,"Retry Scan".center(cols))
+                sleep(1)
+                lcd.clear() 
+                lcd.printline(1, 'Ready for Scan'.center(cols))
+                continue 
+            data = pyzbar.decode(frame) #Decode the frame. Data will be populated if there is a QRcode in the frame
+            framenum = 0
+
+        #{obj.data.decode('utf-8')}
         lcd.clear()
         lcd.printline(1, 'Scanning...'.center(cols))
+        
         if has_internet(): #Check Internet...
             response = requests.post("http://localhost:8000/scan", json={"id": data})
             if not response.Success:
-                lcd.printline(2, 'Error Scanning'.center(cols))
+                lcd.printline(2, 'Error Inputing'.center(cols))
                 lcd.printline(3, 'Restart'.center(cols))
                 break
             lcd.printline(2, 'Scan Success'.center(cols))
@@ -87,7 +105,8 @@ while True:
             lcd.clear()
             attempt_reconnection()
             lcd.clear()
-    cv2.imshow("QRCODEscanner", img)    
-    
-cap.release()
-cv2.destroyAllWindows()
+except KeyboardInterrupt: #Handles CTRL+C when exiting
+    print("Interrupt Recieved...")
+finally:
+    cap.release()
+    print("Camera released. Exiting. ")
