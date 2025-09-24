@@ -57,10 +57,10 @@ lcd.printline(1, 'Initializing'.center(cols))
 lcd.printline(2, 'Server...'.center(cols))
 
 #Start Local Server. Popen command is non-blocking
-#proc = subprocess.Popen(
-#    ["npm", "run", "production"],
-#    cwd="/home/makerpi/Projects/makerspaceproj"
-#)
+proc = subprocess.Popen(
+    ["npm", "run", "production"],
+    cwd="/home/makerpi/Projects/makerspaceproj"
+)
 
 #message = 0 #Boolean to denote that a message has been posted so we don't get repeats...
 lcd.clear()
@@ -69,7 +69,7 @@ data = []
 framenum = 0
 
 try:
-    while True: 
+    while True:
         lcd.printline(1, 'Ready for Scan'.center(cols))
         while not data: #While we haven't had a code...
             ret, frame = cap.read() # Read a frame
@@ -88,21 +88,22 @@ try:
         #{obj.data.decode('utf-8')}
         lcd.clear()
         lcd.printline(1, 'Scanning...'.center(cols))
-        
         if has_internet(): #Check Internet...
-            response = requests.post("http://localhost:8000/scan", json={"id": data})
-            if not response.Success:
-                print(response)
+            response = requests.post("http://localhost:8000/scan", json={"id":str(data[0].data)[2:-1]})
+            response = response.json()
+            if not response["Success"]:
+                print(response["Message"])
                 lcd.printline(2, 'Error Inputing'.center(cols))
                 lcd.printline(3, 'Restart'.center(cols))
-                break
+                raise Exception("Problem with Backend")
             lcd.printline(2, 'Scan Success'.center(cols))
-            sleep(3)
+            sleep(2)
             lcd.clear()
         else:
             lcd.clear()
             attempt_reconnection()
             lcd.clear()
+        data = [] #Clears Data for next Scan/Reading
 except KeyboardInterrupt: #Handles CTRL+C when exiting
     print("Interrupt Recieved...")
 

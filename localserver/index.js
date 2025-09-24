@@ -37,7 +37,9 @@ app.get("/test", async (req,res) =>
 app.post("/scan", async (req,res) => 
 {
   let date = new Date();
-  date = date.toLocaleString(); //Get time of scan
+  date = date.toLocaleString("en-US"); //Get time of scan
+	
+  console.log("Test" + date);
 
   const sheets = google.sheets({version: 'v4', auth}); //Sheet API Instantiation
   const spreadsheetId = process.env.sheetid; //SpreadSheet ID
@@ -47,7 +49,7 @@ app.post("/scan", async (req,res) =>
    let ranges = [
     "CheckedIn!A2:A","CheckedIn!C2:C" //Range to retreive all StudentID's currently checked in and the respective row. A1 is the Header, so we skip
   ];
-
+  console.log("Getting Current ID's");
   let result = await sheetfunctions.SheetsBatchGet(res,sheets,spreadsheetId,ranges); //Get StudentID's and respective rows at which the ID is at
   if(!result) return; //Will return if SheetsBatchGet is an Error
 
@@ -56,6 +58,7 @@ app.post("/scan", async (req,res) =>
   
   if(index > -1) //If found(Student is checked in...)
   {
+    console.log("Found");
     range = `CheckedIn!A${result.data.valueRanges[1].values.flat()[index]}:C${result.data.valueRanges[1].values.flat()[index]}`;
     
     let resarr = await sheetfunctions.SheetsGet(res,sheets,spreadsheetId,range); //Get Row(Get checkin time of ID. This is where row number is used)
@@ -84,6 +87,7 @@ app.post("/scan", async (req,res) =>
   }
   else //If not found
   {
+    console.log("Not Found");
     range = 'CheckedIn!A2:B2';//Setup Range for appending
     
     let values = [ //The cell data. Since we are only doing one row with 2 columns, we use 1 arr with 2 elements.
