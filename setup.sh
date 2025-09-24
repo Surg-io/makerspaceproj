@@ -41,6 +41,8 @@ echo "Adjusting wifi prioritizations..."
 
 #nmcli connection modify "Hotspot" connection.autoconnect-retries 0 //Infinite amount of retries
 
+# Adjust time zone settings
+# sudo timedatectl set-timezone America/Los_Angeles
 
-
+# source /etc/default/locale
 
