@@ -1,3 +1,6 @@
+import datetime
+from time import sleep
+'''
 import cv2
 from pyzbar import pyzbar
 
@@ -23,10 +26,10 @@ while True:
     decoded_objects = pyzbar.decode(frame)
 
 
-    '''
-    for obj in decoded_objects:
-        print(f"Detected QR code: {obj.data.decode('utf-8')}")
-    '''
+    
+    #for obj in decoded_objects:
+    #   print(f"Detected QR code: {obj.data.decode('utf-8')}")
+    
     print(decoded_objects) #This should print one thing, one string...
     
     
@@ -37,3 +40,10 @@ while True:
 
 cap.release()
 print("Done")
+'''
+
+q = []
+
+for i in range(3):
+    q.append(str("100" + i),datetime.datetime.now() )
+    sleep(3)

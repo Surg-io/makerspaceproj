@@ -23,30 +23,45 @@ app.use(bodyParser.json()); //Executes parsing middleware for all requests
 //For Testing Purposes
 app.get("/", async (req,res) =>
 {
-    console.log("Get Request");
-  return res.status(200).send({"Success":"True"});
+  console.log("Get Request");
+  return res.status(200).send({"Success":1});
 });
 
 //Ensures the server is initialized
 app.get("/test", async (req,res) =>
 {
-  return res.status(200).send({"Success":"True"});
+  return res.status(200).send({"Success":1});
 });
 
+//BatchScan
+app.post("/batchscan", async(req,res) =>
+{
+  let range = 'CheckedIn!A2:B2';//Setup Range for appending. ID will go in A, Start time will be in B. 
+  console.log(req.body);
+  let values = []
+  req.body.forEach(([ID, Time]) => { //For each item in the array, extract ID and Time
+    values.push([ID,Time])
+  });
+  const resource = { //Formatting for append call
+    values
+  };
+  result = await sheetfunctions.SheetsAppend(res,sheets,spreadsheetId,range,resource); //Append will add on to the established table. 
+  if(!result) return;
+  
+  res.status(200).send({"Success": 1});
+});
 
 app.post("/scan", async (req,res) => 
 {
   let date = new Date();
-  date = date.toLocaleString("en-US"); //Get time of scan
-	
-  console.log("Test" + date);
+  date = date.toLocaleString("en-US"); //Get time of scan. Allows for MM/DD/YYYY, HH:MM:SS. Google sheets can parse this easy.
 
   const sheets = google.sheets({version: 'v4', auth}); //Sheet API Instantiation
-  const spreadsheetId = process.env.sheetid; //SpreadSheet ID
+  const spreadsheetId = process.env.sheetid; //SpreadSheet ID. Private for obv reasons.
 
-  let range;
+  
 
-   let ranges = [
+  let ranges = [
     "CheckedIn!A2:A","CheckedIn!C2:C" //Range to retreive all StudentID's currently checked in and the respective row. A1 is the Header, so we skip
   ];
   console.log("Getting Current ID's");
@@ -59,7 +74,7 @@ app.post("/scan", async (req,res) =>
   if(index > -1) //If found(Student is checked in...)
   {
     console.log("Found");
-    range = `CheckedIn!A${result.data.valueRanges[1].values.flat()[index]}:C${result.data.valueRanges[1].values.flat()[index]}`;
+    let range = `CheckedIn!A${result.data.valueRanges[1].values.flat()[index]}:C${result.data.valueRanges[1].values.flat()[index]}`;
     
     let resarr = await sheetfunctions.SheetsGet(res,sheets,spreadsheetId,range); //Get Row(Get checkin time of ID. This is where row number is used)
     if(!resarr) return; //Will return if Get is an Error
@@ -88,18 +103,18 @@ app.post("/scan", async (req,res) =>
   else //If not found
   {
     console.log("Not Found");
-    range = 'CheckedIn!A2:B2';//Setup Range for appending
+    let range = 'CheckedIn!A2:B2';//Setup Range for appending. ID will go in A, Start time will be in B. 
     
-    let values = [ //The cell data. Since we are only doing one row with 2 columns, we use 1 arr with 2 elements.
+    let values = [ //The cell data. Since we are only doing one row with 2 columns, we use 1 array with 2 elements.
     [req.body.id, date]];
     const resource = { //Formatting for append call
       values
     };
 
-    result = await sheetfunctions.SheetsAppend(res,sheets,spreadsheetId,range,resource);
+    result = await sheetfunctions.SheetsAppend(res,sheets,spreadsheetId,range,resource); //Append will add on to the established table. 
     if(!result) return;
   }
-  return res.status(200).send({"Success":"True"});
+  return res.status(200).send({"Success":1});
 });
 
 app.listen(port,() =>
