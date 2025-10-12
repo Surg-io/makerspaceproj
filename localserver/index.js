@@ -34,21 +34,47 @@ app.get("/test", async (req,res) =>
 });
 
 //BatchScan
-app.post("/batchscan", async(req,res) =>
+app.post("/batchscan", async (req,res) =>
 {
-  let range = 'CheckedIn!A2:B2';//Setup Range for appending. ID will go in A, Start time will be in B. 
-  console.log(req.body);
-  let values = []
-  req.body.forEach(([ID, Time]) => { //For each item in the array, extract ID and Time
-    values.push([ID,Time])
+  let curr = req.body[0]
+  let hist = req.body[1]
+
+  let checkbatch = []
+  curr.forEach(([ID, Time]) => { //For each item in the array, extract ID and Time
+    checkbatch.push([ID,Time])
   });
-  const resource = { //Formatting for append call
-    values
+ 
+  const resource1 = { //Formatting for append call
+    checkbatch
   };
-  result = await sheetfunctions.SheetsAppend(res,sheets,spreadsheetId,range,resource); //Append will add on to the established table. 
-  if(!result) return;
   
-  res.status(200).send({"Success": 1});
+  histbatch = [];
+  hist.forEach(([ID, Start, End]) => {
+    histbatch.push([ID,Start,End])
+  });
+
+  const resource2 = {histbatch};
+  
+    // Kick off both requests
+    const req1 = sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: 'CheckedIn!A2:B2',
+      valueInputOption: 'USER_ENTERED',
+      resource1
+    });
+
+    const req2 = sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: 'History!A2:C2',
+      valueInputOption: 'USER_ENTERED',
+      resource2
+    });
+
+    // Wait for both to complete
+    Promise.all([req1, req2])
+    .then(() => res.status(200).send({"Success" : 1})) //Send a success if both requests are successful
+    .catch(() => res.status(500).send({"Success" : 0})); //Send a failure if one fails
+
 });
 
 app.post("/scan", async (req,res) => 

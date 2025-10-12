@@ -71,7 +71,7 @@ def submitscans(curr,h):
     '''
     if response["Success"]: #Clear both if we are successful -- TEST!!
         curr.clear() 
-        h.clear()
+        h.clear() 
 
 t = threading.Thread(target=attempt_reconnection) # Allocates thread. Target param is the function to execute and args is the arg passed.
 t.start() #Start Thread. Multithreading helps as we don't have to wait scans caught offline to be uploaded before trying to scan new codes (We won't stall the main thread).
