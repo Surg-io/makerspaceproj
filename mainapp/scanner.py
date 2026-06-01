@@ -11,7 +11,7 @@ import liquidcrystal_i2c
 connected = 0
 
 def attempt_reconnection():
-    #Nifty Pi CLI commands for connection
+    #Nifty Pi CLI commands for conneHction
 
     # nmcli connection show - Shows all saved connections
     # sudo wpa_cli -i wlan0 scan/scan_results - Scan first, then show results. Shows all available wifi connections
@@ -22,6 +22,7 @@ def attempt_reconnection():
 
     #print("Attempting to reconnect...")
     while True:
+        global connected
         if connected:
             sleep(300) #Recheck internet status every 5 minutes, if we are connected
         else:
@@ -106,6 +107,8 @@ lcd.clear()
 
 try:
     while True:
+        if not connected:
+            lcd.printline(0, 'No Internet'.center(cols))
         lcd.printline(1, 'Ready for Scan'.center(cols))
         while not data: #While we haven't had a code...
             ret, frame = cap.read() # Read a frame
@@ -129,6 +132,7 @@ try:
         if has_internet(): #Check Internet...
             connected = 1
             if not currcheck or not history: #Because we have internet, we should upload local saved scans, if we have any
+                print(len(currcheck),len(history), ": Lengths of currcheck and History")
                 t = threading.Thread(target=submitscans, args=[currcheck,history]) # Allocates thread. Target param is the function to execute and args is the arg passed.
                 t.start() #Start Thread. Multithreading helps as we don't have to wait scans caught offline to be uploaded before trying to scan new codes (We won't stall the main thread).
             response = requests.post("http://localhost:8000/scan", json={"id":ID}) #Upload current scan
