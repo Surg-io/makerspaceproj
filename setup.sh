@@ -1,5 +1,5 @@
-#A setup script to initialize a pi for the project. The project requires a few commands regarding enabling I2C permissions, wifi setup, and installing dependencies.
-#Rather than doing it manually, this file will (hopefully) do it all in on go
+#-- A setup script to initialize a pi for the project. The project requires a few commands regarding enabling I2C permissions, wifi setup, and installing dependencies.
+#-- Rather than doing it manually, this file will (hopefully) do it all in on go
 
 #Execute this script by running: bash setup.sh
 #!/bin/bash
@@ -96,8 +96,31 @@ echo " IMPORTANT:"
 echo " - Reboot required for I2C + group permissions"
 echo "   sudo reboot"
 echo "=============================="
+#-- Execute this script by running: bash setup.sh
 
-#Change parameters that fit your organization/locations wifi
+#!/bin/bash 
+
+#--To install python packages system-wide, try apt install python3-xyz, where xyz is the package you're trying to install
+
+#--Enable I2C
+
+#sudo apt install python3-smbus
+
+#--Adjust the config files to enable the I2C flag. This should automatically setup
+#echo "Setting I2C device permissions..."
+#sudo chmod 666 /dev/i2c-*
+
+#echo "Installing Python dependencies from requirements.txt..."
+#pip install -r requirements.txt
+
+#--Installing nodejs
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt install -y nodejs
+
+echo "Installing Node.js dependencies..."
+npm install
+
+#--Change parameters that fit your organization/locations wifi
 echo "Adjusting wifi prioritizations..."
 #nmcli connection add type wifi ifname wlan0 con-name orgwifi ssid "ORG_WIFI_NAME" \
 #  802-11-wireless-security.key-mgmt wpa-eap \
@@ -108,15 +131,16 @@ echo "Adjusting wifi prioritizations..."
 
 #nmcli connection modify orgwifi connection.autoconnect yes
 
-# Org Wi-Fi: first choice. (Setting Priorities is optional)
+#--Org Wi-Fi: first choice. (Setting Priorities is optional)
 #nmcli connection modify orgwifi connection.priority 100
 
 #nmcli connection modify "<connection-name>" connection.autoconnect-priority <priority-value>
 
 #nmcli connection modify "Hotspot" connection.autoconnect-retries 0 //Infinite amount of retries
 
-# Adjust time zone settings
+#--Adjust time zone settings
 # sudo timedatectl set-timezone America/Los_Angeles
 
 # source /etc/default/locale
 
+#--ADD INSTRUCTIONS FOR SETTING THIS UP AS A DAEMON
