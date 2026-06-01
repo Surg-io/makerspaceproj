@@ -26,17 +26,20 @@ def attempt_reconnection():
         if connected:
             sleep(300) #Recheck internet status every 5 minutes, if we are connected
         else:
+            print("Attempting to reconnect...")
             #Disconnect and reconnect
+            print("Disconnecting...")
             subprocess.check_call(["nmcli","device","disconnect","wlan0"], 
             stdout=subprocess.DEVNULL, # Hide output from printing to console.(Redirects stdout to DEVNULL)
             stderr=subprocess.DEVNULL # Hide error output
             )
             sleep(20) #Allows the connection to disconnect
+            print("Reconnecting...")
             subprocess.check_call(["nmcli","device","connect","wlan0"], 
             stdout=subprocess.DEVNULL, # Hide output from printing to console.(Redirects stdout to DEVNULL)
             stderr=subprocess.DEVNULL # Hide error output
             )
-            sleep(20) #Allows the connection to disconnect
+            sleep(20) #Allows the connection to connect
             if has_internet():
                 connected = 1
             else: 
@@ -153,8 +156,9 @@ try:
         else: #If we have no internet connection, we will save the scan locally
             connected = 0
             lcd.clear()
+            lcd.printline(2, 'Scan Success'.center(cols))
             if currcheck.get(ID): #If we have a scan for the ID already...
-                history.push([ID, #Save the data (ID, first scan time, curr time) into the history array. This is for the history sheet
+                history.append([ID, #Save the data (ID, first scan time, curr time) into the history array. This is for the history sheet
                               currcheck.pop(ID),#Also, Delete that entry from currcheck
                               datetime.datetime.now()])             
             else:

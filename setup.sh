@@ -96,29 +96,7 @@ echo " IMPORTANT:"
 echo " - Reboot required for I2C + group permissions"
 echo "   sudo reboot"
 echo "=============================="
-#-- Execute this script by running: bash setup.sh
 
-#!/bin/bash 
-
-#--To install python packages system-wide, try apt install python3-xyz, where xyz is the package you're trying to install
-
-#--Enable I2C
-
-#sudo apt install python3-smbus
-
-#--Adjust the config files to enable the I2C flag. This should automatically setup
-#echo "Setting I2C device permissions..."
-#sudo chmod 666 /dev/i2c-*
-
-#echo "Installing Python dependencies from requirements.txt..."
-#pip install -r requirements.txt
-
-#--Installing nodejs
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt install -y nodejs
-
-echo "Installing Node.js dependencies..."
-npm install
 
 #--Change parameters that fit your organization/locations wifi
 echo "Adjusting wifi prioritizations..."
