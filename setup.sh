@@ -46,3 +46,4 @@ echo "Adjusting wifi prioritizations..."
 
 # source /etc/default/locale
 
+#ADD INSTRUCTIONS FOR SETTING THIS UP AS A DAEMON
