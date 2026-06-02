@@ -8,7 +8,7 @@ import subprocess #Allows us to run console commands
 from pyzbar import pyzbar
 import liquidcrystal_i2c 
 
-connected = 0
+connected = 1
 
 def attempt_reconnection():
     #Nifty Pi CLI commands for conneHction
@@ -139,7 +139,7 @@ try:
 
         if has_internet(): #Check Internet...
             connected = 1
-            if not currcheck or not history: #Because we have internet, we should upload local saved scans, if we have any
+            if currcheck or history: #Because we have internet, we should upload local saved scans, if we have any
                 print(len(currcheck),len(history), ": Lengths of currcheck and History")
                 t = threading.Thread(target=submitscans, args=[currcheck,history]) # Allocates thread. Target param is the function to execute and args is the arg passed.
                 t.start() #Start Thread. Multithreading helps as we don't have to wait scans caught offline to be uploaded before trying to scan new codes (We won't stall the main thread).
