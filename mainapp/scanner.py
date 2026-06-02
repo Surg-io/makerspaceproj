@@ -26,18 +26,23 @@ def attempt_reconnection():
         if connected:
             sleep(300) #Recheck internet status every 5 minutes, if we are connected
         else:
-            print("Attempting to reconnect...")
+            print("No Internet. Attempting Disconnect...")
             #Disconnect and reconnect
-            print("Disconnecting...")
-            subprocess.check_call(["nmcli","device","disconnect","wlan0"], 
-            stdout=subprocess.DEVNULL, # Hide output from printing to console.(Redirects stdout to DEVNULL)
-            stderr=subprocess.DEVNULL # Hide error output
-            )
-            sleep(20) #Allows the connection to disconnect
-            print("Reconnecting...")
-            subprocess.check_call(["nmcli","device","connect","wlan0"], 
-            stdout=subprocess.DEVNULL, # Hide output from printing to console.(Redirects stdout to DEVNULL)
-            stderr=subprocess.DEVNULL # Hide error output
+            try:
+                subprocess.run( #ON REGULAR CONSOLE, ERROR IS THROWN IF THERE IS ALREADY NO INTERNET. DOUBLECHECK TO ENSURE IT WORKS
+                    ["nmcli", "device", "disconnect", "wlan0"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=True)
+                sleep(20) #Allows the connection to disconnect
+            except subprocess.CalledProcessError:
+                print("Already Disconnected!")
+            print("Attempting Reconnecting...")
+            subprocess.run( #Should run regularly whether or not we are already connected to internet
+                ["nmcli", "device", "connect", "wlan0"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                check=True
             )
             sleep(20) #Allows the connection to connect
             if has_internet():
@@ -47,7 +52,7 @@ def attempt_reconnection():
    
 def has_internet():
     try:
-        subprocess.check_call(
+        subprocess.run(
             ["ping", "-c", "1", "8.8.8.8"],  # Command to run. (Send 1 ICMP packet to google dns server(8.8.8.8))
             stdout=subprocess.DEVNULL, # Hide output from printing to console.(Redirects stdout to DEVNULL)
             stderr=subprocess.DEVNULL # Hide error output
